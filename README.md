@@ -14,13 +14,12 @@
 ```Rust
 
 
+#[derive(Component)]
 struct Value(i32);
-
-impl Component for Value {}
 
 
 #[cow_task]
-fn task_to_run(mut values: &mut CompsMut<Value>) {
+fn task_to_run(mut values: CompsMut<Value>) {
     for (_, value) in values.iter_mut() {
         value.0 += 1;
         println!("Value is {}", value.0);
