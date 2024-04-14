@@ -1,33 +1,15 @@
+use crate::commands::{EntityCommand, EntityCommands};
 use crate::component::comp_storage::CompStorage;
 use crate::component::component::Component;
 use crate::data::sparse_set::{SparseArrayIntersectionIter, SparseArrayIntersectionMutIter, SparseArrayIter, SparseArrayIterMut};
 use crate::entity::entity::EntityId;
-use crate::entity::entity_manager::EntityManager;
 use crate::resource::resource::Resource;
-
-pub struct Entities<'a> {
-    entities: &'a mut EntityManager,
-}
-
-impl<'a> Entities<'a> {
-    pub fn new(entities: &'a mut EntityManager) -> Self {
-        Self { entities }
-    }
-
-    pub fn create(&mut self) -> EntityId {
-        self.entities.generate()
-    }
-
-    pub fn release(&mut self, entity_id: EntityId) {
-        self.entities.release(entity_id)
-    }
-}
 
 pub struct Comps<'a, T: Component> {
     storage: &'a CompStorage<T>,
 }
 
-impl<'a, T: Component> Comps<'a, T> {
+impl<'a, T: Component + 'static> Comps<'a, T> {
     pub fn new(storage: &'a CompStorage<T>) -> Self {
         Self { storage }
     }
@@ -49,7 +31,7 @@ pub struct CompsMut<'a, T: Component> {
     storage: &'a mut CompStorage<T>,
 }
 
-impl<'a, T: Component> CompsMut<'a, T> {
+impl<'a, T: Component + 'static> CompsMut<'a, T> {
     pub fn new(storage: &'a mut CompStorage<T>) -> Self {
         Self { storage }
     }
@@ -114,5 +96,23 @@ impl<'a, T: Resource> ResMut<'a, T> {
 
     pub fn get_mut(&mut self) -> &mut T {
         &mut self.resource
+    }
+}
+
+pub struct Commands<'a> {
+    commands: &'a mut EntityCommands,
+}
+
+impl<'a> Commands<'a> {
+    pub fn new(commands: &'a mut EntityCommands) -> Self {
+        Self { commands }
+    }
+
+    pub fn create(&mut self) -> &mut EntityCommand {
+        self.commands.add()
+    }
+
+    pub fn remove(&mut self, entity_id: EntityId) {
+        self.commands.remove(entity_id)
     }
 }

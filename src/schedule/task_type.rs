@@ -6,7 +6,7 @@ pub enum TaskType {
     CompMut(TypeId),
     Res(TypeId),
     ResMut(TypeId),
-    Entities(),
+    Commands(),
 }
 
 impl TaskType {
@@ -42,7 +42,7 @@ impl TaskType {
                     _ => {}
                 }
             }
-            TaskType::Entities() => {
+            TaskType::Commands() => {
                 return false;
             }
         }

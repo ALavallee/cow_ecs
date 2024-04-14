@@ -23,10 +23,6 @@ impl EntityLock {
         self.manager.read().unwrap().count()
     }
 
-    pub(crate) fn clear_releases(&mut self) -> Vec<EntityId> {
-        self.manager.write().unwrap().clear_releases()
-    }
-
     pub fn manager(&self) -> &Arc<RwLock<EntityManager>> {
         &self.manager
     }

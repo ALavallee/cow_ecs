@@ -10,11 +10,12 @@ pub mod resource;
 pub mod comps;
 
 pub use cow_macros;
+use crate::commands::EntityCommands;
 
 mod data;
+pub mod commands;
 
 use crate::component::comp_manager::CompManager;
-use crate::entity::entity_lock::EntityLock;
 use crate::resource::res_manager::ResManager;
 use crate::schedule::task_type::TaskType;
 use crate::world::World;
@@ -26,5 +27,5 @@ pub trait Task {
 
     fn arguments(&self) -> Vec<TaskType>;
 
-    fn run(&self, components: &CompManager, entities: &EntityLock, resource: &ResManager);
+    fn run(&self, components: &CompManager, commands: &mut EntityCommands, resource: &ResManager);
 }

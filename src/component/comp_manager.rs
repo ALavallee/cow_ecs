@@ -1,7 +1,7 @@
 use std::any::{TypeId};
 use std::collections::HashMap;
 use crate::component::comp_lock::{CompLock, CompLockAny};
-use crate::component::component::Component;
+use crate::component::component::{Component, ComponentAny};
 use crate::entity::entity::EntityId;
 
 pub struct CompManager {
@@ -30,6 +30,11 @@ impl CompManager {
         if self.components.get(&id).is_none() {
             self.components.insert(id, Box::new(CompLock::<T>::new()));
         }
+    }
+
+    pub fn insert_by_comp_id(&mut self, type_id: TypeId, entity_id: EntityId, comp: Box<dyn ComponentAny>) {
+        let storage = self.components.get_mut(&type_id).unwrap();
+        storage.add_any(entity_id, comp);
     }
 
     pub fn remove(&mut self, entity_id: EntityId) {

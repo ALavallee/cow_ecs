@@ -2,7 +2,7 @@ extern crate proc_macro;
 
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, ItemFn, FnArg, Type, PathArguments};
+use syn::{parse_macro_input, ItemFn, FnArg, Type, PathArguments, DeriveInput};
 
 #[proc_macro_attribute]
 pub fn cow_task(_attr: TokenStream, item: TokenStream) -> TokenStream {
@@ -35,56 +35,50 @@ pub fn cow_task(_attr: TokenStream, item: TokenStream) -> TokenStream {
     for input_arg in input_fn.sig.inputs.iter() {
         if let FnArg::Typed(pat_type) = input_arg {
             // Check if the type is a path
-            if let Type::Reference(type_reference) = &*pat_type.ty {
-                if let Type::Path(type_path) = &*type_reference.elem {
-                    let actual_path = type_path.path.segments.iter()
-                        .map(|seg| seg.ident.to_string())
-                        .collect::<Vec<_>>()
-                        .join("::");
+            if let Type::Path(type_path) = &*pat_type.ty {
+                let actual_path = type_path.path.segments.iter()
+                    .map(|seg| seg.ident.to_string())
+                    .collect::<Vec<_>>()
+                    .join("::");
 
-                    if let Some(last_segment) = type_path.path.segments.last() {
-                        if let syn::PathArguments::AngleBracketed(angle_bracketed_param) = &last_segment.arguments {
-                            if let Some(syn::GenericArgument::Type(generic_type)) = angle_bracketed_param.args.first() {
-                                // Convert the generic type to a string and push it to template_types
-                                if actual_path == "Comps" {
-                                    templates.push(generic_type);
-                                    tasks_type.push(quote!(cow_ecs::schedule::task_type::TaskType::Comp(std::any::TypeId::of::<#generic_type>())));
-                                    args_call.push(quote!(&Comps::new(&&comps.query::<#generic_type>().unwrap().storage().read().unwrap())));
-                                } else if actual_path == "CompsMut" {
-                                    templates.push(generic_type);
-                                    tasks_type.push(quote!(cow_ecs::schedule::task_type::TaskType::CompMut(std::any::TypeId::of::<#generic_type>())));
-                                    args_call.push(quote!(&mut CompsMut::new(& mut comps.query::<#generic_type>().unwrap().storage().write().unwrap())));
-                                } else if actual_path == "Res" {
-                                    tasks_type.push(quote!(cow_ecs::schedule::task_type::TaskType::Res(std::any::TypeId::of::<#generic_type>())));
-                                    args_call.push(quote!(&Res::new(&res.query::<#generic_type>().unwrap().resource().read().unwrap())));
-                                } else if actual_path == "ResMut" {
-                                    tasks_type.push(quote!(cow_ecs::schedule::task_type::TaskType::ResMut(std::any::TypeId::of::<#generic_type>())));
-                                    args_call.push(quote!(&Res::new(&res.query::<#generic_type>().unwrap().resource().write().unwrap())));
-                                } else {
-                                    return syn::Error::new_spanned(&input_fn.sig.output, "cow_task expect arguments to be &Comps<T>,&Res<T> or &Entities, not ".to_owned() + &actual_path)
-                                        .to_compile_error()
-                                        .into();
-                                }
+                if let Some(last_segment) = type_path.path.segments.last() {
+                    if let syn::PathArguments::AngleBracketed(angle_bracketed_param) = &last_segment.arguments {
+                        if let Some(syn::GenericArgument::Type(generic_type)) = angle_bracketed_param.args.first() {
+                            // Convert the generic type to a string and push it to template_types
+                            if actual_path == "Comps" {
+                                templates.push(generic_type);
+                                tasks_type.push(quote!(cow_ecs::schedule::task_type::TaskType::Comp(std::any::TypeId::of::<#generic_type>())));
+                                args_call.push(quote!(Comps::new(&&comps.query::<#generic_type>().unwrap().storage().read().unwrap())));
+                            } else if actual_path == "CompsMut" {
+                                templates.push(generic_type);
+                                tasks_type.push(quote!(cow_ecs::schedule::task_type::TaskType::CompMut(std::any::TypeId::of::<#generic_type>())));
+                                args_call.push(quote!(CompsMut::new(& mut comps.query::<#generic_type>().unwrap().storage().write().unwrap())));
+                            } else if actual_path == "Res" {
+                                tasks_type.push(quote!(cow_ecs::schedule::task_type::TaskType::Res(std::any::TypeId::of::<#generic_type>())));
+                                args_call.push(quote!(Res::new(&res.query::<#generic_type>().unwrap().resource().read().unwrap())));
+                            } else if actual_path == "ResMut" {
+                                tasks_type.push(quote!(cow_ecs::schedule::task_type::TaskType::ResMut(std::any::TypeId::of::<#generic_type>())));
+                                args_call.push(quote!(ResMut::new(&res.query::<#generic_type>().unwrap().resource().write().unwrap())));
                             } else {
                                 return syn::Error::new_spanned(&input_fn.sig.output, "cow_task expect arguments to be &Comps<T>,&Res<T> or &Entities, not ".to_owned() + &actual_path)
                                     .to_compile_error()
                                     .into();
                             }
-                        } else if actual_path == "Entities" {
-                            tasks_type.push(quote!(cow_ecs::schedule::task_type::TaskType::Entities()));
-                            args_call.push(quote!(&mut Entities::new(&mut entities.manager().write().unwrap())));
                         } else {
-                            return syn::Error::new_spanned(&input_fn.sig.output, "cow_task expect arguments to be &Comps<T>, &Res<T> or &Entities, not ")
+                            return syn::Error::new_spanned(&input_fn.sig.output, "cow_task expect arguments to be &Comps<T>,&Res<T> or &Entities, not ".to_owned() + &actual_path)
                                 .to_compile_error()
                                 .into();
                         }
+                    } else if actual_path == "Commands" {
+                        tasks_type.push(quote!(cow_ecs::schedule::task_type::TaskType::Commands()));
+                        args_call.push(quote!(cow_ecs::comps::Commands::new(commands)));
                     } else {
-                        return syn::Error::new_spanned(&input_fn.sig.output, "cow_task expect arguments to be &Comps<T> or &Res<T>, not ")
+                        return syn::Error::new_spanned(&input_fn.sig.output, "cow_task expect arguments to be &Comps<T>, &Res<T> or &Entities, not ")
                             .to_compile_error()
                             .into();
                     }
                 } else {
-                    return syn::Error::new_spanned(&input_fn.sig.output, "cow_task expect arguments to be &Comps<T> or &Res<T>")
+                    return syn::Error::new_spanned(&input_fn.sig.output, "cow_task expect arguments to be &Comps<T> or &Res<T>, not ")
                         .to_compile_error()
                         .into();
                 }
@@ -120,7 +114,7 @@ pub fn cow_task(_attr: TokenStream, item: TokenStream) -> TokenStream {
             }
 
             fn run(&self, comps: &cow_ecs::component::comp_manager::CompManager,
-                entities : &cow_ecs::entity::entity_lock::EntityLock,
+                commands : &mut cow_ecs::commands::EntityCommands,
                 res : &cow_ecs::resource::res_manager::ResManager) {
                 #input_fn
 
@@ -128,8 +122,8 @@ pub fn cow_task(_attr: TokenStream, item: TokenStream) -> TokenStream {
                 use cow_ecs::comps::Comps;
                 use cow_ecs::comps::CompsMut;
                 use cow_ecs::comps::Res;
-                use cow_ecs::comps::Entities;
                 use cow_ecs::comps::ResMut;
+                use cow_ecs::comps::Commands;
 
                 #fn_name(#(#args_call),*);
             }
@@ -166,4 +160,28 @@ fn check_fn_args_for_generics(func: &ItemFn) -> bool {
     }
 
     return true;
+}
+
+#[proc_macro_derive(Component)]
+pub fn cow_component_derive(input: TokenStream) -> TokenStream {
+    // Parse the input tokens into a syntax tree
+    let input = parse_macro_input!(input as DeriveInput);
+
+    // Used for the implementation
+    let name = &input.ident;
+
+    // Generate the implementation
+    let expanded = quote! {
+        impl cow_ecs::component::component::ComponentAny for #name {
+
+             fn into_any(self: Box<Self>) -> Box<dyn std::any::Any> {
+                self
+            }
+
+        }
+        impl cow_ecs::component::component::Component for #name {}
+    };
+
+    // Hand the output tokens back to the compiler
+    TokenStream::from(expanded)
 }

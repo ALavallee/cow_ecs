@@ -55,14 +55,7 @@ impl World {
         &mut self.components
     }
 
-    pub fn managers(&mut self) -> (&CompManager, &EntityLock, &ResManager) {
-        (&self.components, &self.entities, &self.resources)
-    }
-
-    pub(crate) fn update(&mut self) {
-        let all_releases = self.entities.clear_releases();
-        for id in all_releases {
-            self.components.remove(id)
-        }
+    pub fn managers(&mut self) -> (&mut CompManager, &mut EntityLock, &mut ResManager) {
+        (&mut self.components, &mut self.entities, &mut self.resources)
     }
 }

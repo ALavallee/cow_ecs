@@ -1,7 +1,7 @@
 use std::any::Any;
 use std::sync::{Arc, RwLock};
 use crate::component::comp_storage::{CompStorage, CompStorageAny};
-use crate::component::component::Component;
+use crate::component::component::{Component, ComponentAny};
 use crate::entity::entity::EntityId;
 
 pub trait CompLockAny {
@@ -9,10 +9,12 @@ pub trait CompLockAny {
 
     fn as_any_mut(&mut self) -> &mut dyn Any;
 
+    fn add_any(&mut self, entity_id: EntityId, comp: Box<dyn ComponentAny>);
+
     fn remove_any(&mut self, entity_id: EntityId);
 }
 
-pub struct CompLock<T : Component> {
+pub struct CompLock<T: Component> {
     storage: Arc<RwLock<CompStorage<T>>>,
 }
 
@@ -42,6 +44,8 @@ impl<T: Component + 'static> CompLockAny for CompLock<T> {
     fn as_any_mut(&mut self) -> &mut dyn Any {
         self
     }
+
+    fn add_any(&mut self, entity_id: EntityId, comp: Box<dyn ComponentAny>) { self.storage.write().unwrap().add_any(entity_id, comp) }
 
     fn remove_any(&mut self, entity_id: EntityId) {
         self.remove(entity_id)
