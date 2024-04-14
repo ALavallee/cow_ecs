@@ -152,16 +152,25 @@ pub struct SparseArrayIntersectionIter<'a, I, T, X>
     where
         I: Hash + Eq + Copy,
 {
-    iter_a: SparseArrayIter<'a, I, T>,
-    iter_b: SparseArrayIter<'a, I, X>,
+    indices_a: &'a Vec<I>,
+    sparse_b: &'a HashMap<I, usize>,
+    dense_a: &'a Vec<T>,
+    dense_b: &'a Vec<X>,
+    index: usize,
 }
 
 impl<'a, I, T, X> SparseArrayIntersectionIter<'a, I, T, X>
     where
         I: Hash + Eq + Copy,
 {
-    pub fn new(iter_a: SparseArrayIter<'a, I, T>, iter_b: SparseArrayIter<'a, I, X>) -> Self {
-        Self { iter_a, iter_b }
+    pub fn new(a: &'a SparseSet<I, T>, b: &'a SparseSet<I, X>) -> Self {
+        Self {
+            indices_a: &a.indices,
+            sparse_b: &b.sparse,
+            dense_a: &a.dense,
+            dense_b: &b.dense,
+            index: 0,
+        }
     }
 }
 
@@ -172,6 +181,19 @@ impl<'a, I, T, X> Iterator for SparseArrayIntersectionIter<'a, I, T, X>
     type Item = (I, &'a T, &'a X);
 
     fn next(&mut self) -> Option<Self::Item> {
+        while self.index < self.indices_a.len() {
+            let a_index = self.indices_a[self.index];
+
+            if let Some(b_index) = self.sparse_b.get(&a_index) {
+                let a_value = &self.dense_a[self.index];
+                let b_value = &self.dense_b[*b_index];
+
+                self.index += 1;
+                return Some((a_index, a_value, b_value));
+            }
+
+            self.index += 1;
+        }
         None
     }
 }

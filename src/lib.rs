@@ -1,6 +1,5 @@
 #[allow(unused)]
 #[allow(dead_code)]
-#[allow(unused_attributes)]
 pub mod scheduler;
 pub mod world;
 pub mod schedule;

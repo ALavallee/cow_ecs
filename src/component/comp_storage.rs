@@ -60,7 +60,7 @@ impl<T: Component + 'static> CompStorage<T> {
     }
 
     pub(crate) fn iter_intersection<'a, X: Component>(&'a self, other: &'a CompStorage<X>) -> SparseArrayIntersectionIter<EntityId, T, X> {
-        SparseArrayIntersectionIter::new(self.sparse.iter(), other.sparse.iter())
+        SparseArrayIntersectionIter::new(&self.sparse, &other.sparse)
     }
 }
 
