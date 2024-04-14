@@ -12,7 +12,7 @@ impl EntityManager {
         Self { current: 0, frees: vec![], allocated: HashSet::new() }
     }
 
-    pub fn generate(&mut self) -> EntityId {
+    pub fn create(&mut self) -> EntityId {
         return if !self.frees.is_empty() {
             self.frees.pop().unwrap()
         } else {

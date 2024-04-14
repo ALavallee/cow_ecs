@@ -1,19 +1,19 @@
 use crate::component::comp_manager::CompManager;
 use crate::component::component::Component;
 use crate::entity::entity::EntityId;
-use crate::entity::entity_lock::EntityLock;
+use crate::entity::entity_manager::EntityManager;
 use crate::resource::res_manager::ResManager;
 use crate::resource::resource::Resource;
 
 pub struct World {
     resources: ResManager,
     components: CompManager,
-    entities: EntityLock,
+    entities: EntityManager,
 }
 
 impl World {
     pub fn new() -> Self {
-        Self { components: CompManager::new(), entities: EntityLock::new(), resources: ResManager::new() }
+        Self { components: CompManager::new(), entities: EntityManager::new(), resources: ResManager::new() }
     }
 
     pub fn create(&mut self) -> EntityId {
@@ -55,7 +55,7 @@ impl World {
         &mut self.components
     }
 
-    pub fn managers(&mut self) -> (&mut CompManager, &mut EntityLock, &mut ResManager) {
+    pub fn managers(&mut self) -> (&mut CompManager, &mut EntityManager, &mut ResManager) {
         (&mut self.components, &mut self.entities, &mut self.resources)
     }
 }
