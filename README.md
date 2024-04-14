@@ -41,12 +41,9 @@ fn main() {
 
 ## TODO
 
-- Command system (0%)
+- Remove all uses of unwrap
 
 - Parallel Scheduler (20%)
-
-- Component macro
-
 
 
 

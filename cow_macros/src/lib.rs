@@ -58,7 +58,7 @@ pub fn cow_task(_attr: TokenStream, item: TokenStream) -> TokenStream {
                                 args_call.push(quote!(Res::new(&res.query::<#generic_type>().unwrap().resource().read().unwrap())));
                             } else if actual_path == "ResMut" {
                                 tasks_type.push(quote!(cow_ecs::schedule::task_type::TaskType::ResMut(std::any::TypeId::of::<#generic_type>())));
-                                args_call.push(quote!(ResMut::new(&res.query::<#generic_type>().unwrap().resource().write().unwrap())));
+                                args_call.push(quote!(ResMut::new(&mut res.query::<#generic_type>().unwrap().resource().write().unwrap())));
                             } else {
                                 return syn::Error::new_spanned(&input_fn.sig.output, "cow_task expect arguments to be &Comps<T>,&Res<T> or &Entities, not ".to_owned() + &actual_path)
                                     .to_compile_error()
@@ -180,6 +180,23 @@ pub fn cow_component_derive(input: TokenStream) -> TokenStream {
 
         }
         impl cow_ecs::component::component::Component for #name {}
+    };
+
+    // Hand the output tokens back to the compiler
+    TokenStream::from(expanded)
+}
+
+#[proc_macro_derive(Resource)]
+pub fn cow_resource_derive(input: TokenStream) -> TokenStream {
+    // Parse the input tokens into a syntax tree
+    let input = parse_macro_input!(input as DeriveInput);
+
+    // Used for the implementation
+    let name = &input.ident;
+
+    // Generate the implementation
+    let expanded = quote! {
+        impl cow_ecs::resource::resource::Resource for #name { }
     };
 
     // Hand the output tokens back to the compiler
