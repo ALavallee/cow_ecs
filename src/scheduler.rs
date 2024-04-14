@@ -62,7 +62,7 @@ impl Scheduler {
                                 comps_manager.insert_by_comp_id(comp_type_id, new_entity, comp);
                             }
                         }
-                        EntityCommand::RemoveEntity(entity_id) => {
+                        EntityCommand::ReleaseEntity(entity_id) => {
                             world.release(entity_id);
                         }
                     }

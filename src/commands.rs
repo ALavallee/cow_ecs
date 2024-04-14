@@ -5,7 +5,7 @@ use crate::entity::entity::EntityId;
 
 pub enum EntityCommand {
     NewEntity(HashMap<TypeId, Box<dyn ComponentAny>>),
-    RemoveEntity(EntityId),
+    ReleaseEntity(EntityId),
 }
 
 pub struct EntityCommands {
@@ -17,13 +17,13 @@ impl EntityCommands {
         Self { commands: vec![] }
     }
 
-    pub fn add(&mut self) -> &mut EntityCommand {
+    pub fn create(&mut self) -> &mut EntityCommand {
         self.commands.push(EntityCommand::NewEntity(HashMap::new()));
         self.commands.last_mut().unwrap()
     }
 
-    pub fn remove(&mut self, entity_id: EntityId) {
-        self.commands.push(EntityCommand::RemoveEntity(entity_id))
+    pub fn release(&mut self, entity_id: EntityId) {
+        self.commands.push(EntityCommand::ReleaseEntity(entity_id))
     }
 
     pub(crate) fn take_commands(self) -> Vec<EntityCommand> {
@@ -38,7 +38,7 @@ impl EntityCommand {
                 let type_id = TypeId::of::<T>();
                 components.insert(type_id, Box::new(comp));
             }
-            EntityCommand::RemoveEntity(_) => {}
+            EntityCommand::ReleaseEntity(_) => {}
         }
     }
 }

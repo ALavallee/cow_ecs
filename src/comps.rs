@@ -109,10 +109,10 @@ impl<'a> Commands<'a> {
     }
 
     pub fn create(&mut self) -> &mut EntityCommand {
-        self.commands.add()
+        self.commands.create()
     }
 
     pub fn remove(&mut self, entity_id: EntityId) {
-        self.commands.remove(entity_id)
+        self.commands.release(entity_id)
     }
 }
