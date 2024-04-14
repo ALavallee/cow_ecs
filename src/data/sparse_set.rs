@@ -1,4 +1,3 @@
-use std::collections::hash_map::{Iter, Keys};
 use std::collections::HashMap;
 use std::hash::Hash;
 
@@ -56,6 +55,12 @@ impl<I, T> SparseSet<I, T>
                 self.indices.pop();
             }
         }
+    }
+
+    pub fn clear(&mut self) {
+        self.dense.clear();
+        self.sparse.clear();
+        self.indices.clear();
     }
 
     pub fn get(&self, index: I) -> Option<&T> {
@@ -127,9 +132,8 @@ impl<'a, I, T> Iterator for SparseArrayIterMut<'a, I, T>
     type Item = (I, &'a mut T);
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.index < self.dense.len() {
-            // unsafe block for performance
-            unsafe {
+        unsafe {
+            if self.index < self.dense.len() {
                 let key = self.indices.get_unchecked(self.index);
                 // unsafe block to obtain a mutable reference to a value
                 let value = unsafe {
@@ -137,9 +141,9 @@ impl<'a, I, T> Iterator for SparseArrayIterMut<'a, I, T>
                 };
                 self.index += 1;
                 Some((*key, value))
+            } else {
+                None
             }
-        } else {
-            None
         }
     }
 }

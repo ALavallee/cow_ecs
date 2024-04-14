@@ -1,5 +1,5 @@
 use crate::commands::{EntityCommand, EntityCommands};
-use crate::component::comp_storage::CompStorage;
+use crate::component::comp_storage::{CompStorage, CompStorageAny};
 use crate::component::component::Component;
 use crate::data::sparse_set::{SparseArrayIntersectionIter, SparseArrayIntersectionMutIter, SparseArrayIter, SparseArrayIterMut};
 use crate::entity::entity::EntityId;
@@ -38,6 +38,14 @@ impl<'a, T: Component + 'static> CompsMut<'a, T> {
 
     pub fn add(&mut self, entity_id: EntityId, comp: T) {
         self.storage.add(entity_id, comp)
+    }
+
+    pub fn remove(&mut self, entity_id: EntityId) {
+        self.storage.remove(entity_id);
+    }
+
+    pub fn clear(&mut self) {
+        self.storage.clear();
     }
 
     pub fn query_mut(&mut self, id: EntityId) -> Option<&mut T> {

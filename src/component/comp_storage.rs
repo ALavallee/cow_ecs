@@ -32,6 +32,10 @@ impl<T: Component + 'static> CompStorage<T> {
         self.sparse.insert(entity_id, component);
     }
 
+    pub(crate) fn clear(&mut self) {
+        self.sparse.clear();
+    }
+
     pub(crate) fn add_any(&mut self, entity_id: EntityId, comp: Box<dyn ComponentAny>) {
         // Convert Box<dyn ComponentAny> to Box<dyn Any> using the new method
         let comp_any: Box<dyn Any> = comp.into_any();
