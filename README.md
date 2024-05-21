@@ -1,9 +1,9 @@
 
 # Cow ECS - A Rust ECS library
 
- Cow ECS is a simple ECS library. 
- 
- Still under development, the goal for now is to define a working API before implementing the perfomance feature.
+Cow ECS is an ECS library designed with minimal features but exceptional performance, primarily intended for server use. 
+
+Currently under development, our immediate goal is to establish a robust working API before focusing on optimizing performance.
 
 
  
@@ -41,9 +41,11 @@ fn main() {
 
 ## TODO
 
+- Archetype implementation (currently working on it)
+
 - Remove all uses of unwrap
 
-- Parallel Scheduler (20%)
+- Parallel Scheduler
 
 
 
