@@ -49,11 +49,11 @@ impl Scheduler {
             for task in &block.tasks {
                 let mut commands = EntityCommands::new();
                 {
-                    let (comps_manager, entities, res) = world.managers();
-                    task.task().run(comps_manager, &mut commands, res);
+                    let (mut archs, res) = world.managers();
+                    task.task().run(&mut archs, &mut commands, res);
                 }
 
-                for cmd in commands.take_commands().into_iter() {
+                /*for cmd in commands.take_commands().into_iter() {
                     match cmd {
                         EntityCommand::NewEntity(components) => {
                             for (comp_type_id, comp) in components {
@@ -66,7 +66,7 @@ impl Scheduler {
                             world.release(entity_id);
                         }
                     }
-                }
+                }*/
             }
         }
     }

@@ -9,22 +9,22 @@ pub mod resource;
 pub mod comps;
 
 pub use cow_macros;
+use crate::archetype::archetype_manager::ArchetypeManager;
 use crate::commands::EntityCommands;
-
-mod data;
-pub mod commands;
-
-use crate::component::comp_manager::CompManager;
 use crate::resource::res_manager::ResManager;
+
+pub mod commands;
+pub mod archetype;
+
 use crate::schedule::task_type::TaskType;
-use crate::world::World;
+
 
 pub trait Task {
     fn name(&self) -> String;
 
-    fn register(&self, world: &mut World);
-
     fn arguments(&self) -> Vec<TaskType>;
 
-    fn run(&self, components: &CompManager, commands: &mut EntityCommands, resource: &ResManager);
+    fn run(&self, comps: &mut ArchetypeManager,
+           commands: &mut EntityCommands,
+           res: &ResManager);
 }

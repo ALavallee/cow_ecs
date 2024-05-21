@@ -1,77 +1,50 @@
+use crate::archetype::archetype_iter::{ArchetypeQueryIter, ArchetypeQueryIterMut, ArchetypeQueryIterMutNoIndex};
+use crate::archetype::archetype_query::{ArchetypeQuery, ArchetypeQueryMut};
 use crate::commands::{EntityCommand, EntityCommands};
-use crate::component::comp_storage::{CompStorage, CompStorageAny};
+use crate::component::comp_storage::CompStorage;
 use crate::component::component::Component;
-use crate::data::sparse_set::{SparseArrayIntersectionIter, SparseArrayIntersectionMutIter, SparseArrayIter, SparseArrayIterMut};
 use crate::entity::entity::EntityId;
 use crate::resource::resource::Resource;
 
-pub struct Comps<'a, T: Component> {
-    storage: &'a CompStorage<T>,
+pub struct Comps<'a, T: Component + 'static> {
+    query: ArchetypeQuery<'a, T>,
 }
 
 impl<'a, T: Component + 'static> Comps<'a, T> {
-    pub fn new(storage: &'a CompStorage<T>) -> Self {
-        Self { storage }
+    pub fn new(query: ArchetypeQuery<'a, T>) -> Self {
+        Self { query }
+    }
+
+    pub fn iter(&self) -> ArchetypeQueryIter<T> {
+        ArchetypeQueryIter::new(&self.query)
     }
 
     pub fn query(&self, id: EntityId) -> Option<&T> {
-        self.storage.query(id)
-    }
-
-    pub fn iter(&self) -> SparseArrayIter<EntityId, T> {
-        self.storage.iter()
-    }
-
-    pub fn join<X: Component>(&self, other: &Comps<'a, X>) -> SparseArrayIntersectionIter<EntityId, T, X> {
-        self.storage.iter_intersection(other.storage)
+        self.query.query(id)
     }
 }
 
-pub struct CompsMut<'a, T: Component> {
-    storage: &'a mut CompStorage<T>,
+pub struct CompsMut<'a, T: Component + 'static> {
+    query: ArchetypeQueryMut<'a, T>,
 }
 
 impl<'a, T: Component + 'static> CompsMut<'a, T> {
-    pub fn new(storage: &'a mut CompStorage<T>) -> Self {
-        Self { storage }
+    pub fn new(query: ArchetypeQueryMut<'a, T>) -> Self {
+        Self { query }
     }
 
-    pub fn add(&mut self, entity_id: EntityId, comp: T) {
-        self.storage.add(entity_id, comp)
+
+    pub fn iter(&mut self) -> ArchetypeQueryIterMut<'a, T> {
+        ArchetypeQueryIterMut::new(&mut self.query)
     }
 
-    pub fn remove(&mut self, entity_id: EntityId) {
-        self.storage.remove(entity_id);
-    }
-
-    pub fn clear(&mut self) {
-        self.storage.clear();
-    }
-
-    pub fn query_mut(&mut self, id: EntityId) -> Option<&mut T> {
+    /*pub fn query_mut(&mut self, id: EntityId) -> Option<&mut T> {
         self.storage.query_mut(id)
-    }
+    }*/
 
-    pub fn query(&self, id: EntityId) -> Option<&T> {
+    /*pub fn query(&self, id: EntityId) -> Option<&T> {
         self.storage.query(id)
-    }
-
-    pub fn iter_mut(&mut self) -> SparseArrayIterMut<EntityId, T> {
-        self.storage.iter_mut()
-    }
-
-    pub fn iter(&self) -> SparseArrayIter<EntityId, T> {
-        self.storage.iter()
-    }
-
-    pub fn join_mut<'b, X: Component>(&'b mut self, other: &'b mut CompsMut<X>) -> SparseArrayIntersectionMutIter<'b, EntityId, T, X>
-    {
-        self.storage.iter_mut_intersection(&mut other.storage)
-    }
-
-    pub fn join<X: Component>(&self, other: &Comps<'a, X>) -> SparseArrayIntersectionIter<EntityId, T, X> {
-        self.storage.iter_intersection(other.storage)
-    }
+    }*/
 }
 
 pub struct Res<'a, T: Resource> {

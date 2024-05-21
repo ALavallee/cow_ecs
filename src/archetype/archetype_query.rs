@@ -1,0 +1,57 @@
+use std::collections::HashMap;
+use crate::archetype::archetype_iter::{ArchetypeQueryIter, ArchetypeQueryIterMut};
+use crate::component::component::Component;
+use crate::entity::entity::EntityId;
+
+pub struct ArchetypeQuery<'a, T: Component + 'static> {
+    entity_to_index: &'a HashMap<EntityId, usize>,
+    indices: Vec<&'a Vec<EntityId>>,
+    storages: Vec<&'a Vec<T>>,
+}
+
+impl<'a, T: Component + 'static> ArchetypeQuery<'a, T> {
+    pub fn new(entity_to_index: &'a HashMap<EntityId, usize>,
+               indices: Vec<&'a Vec<EntityId>>,
+               storages: Vec<&'a Vec<T>>) -> Self {
+        Self { entity_to_index, indices, storages }
+    }
+
+    pub fn iter(&self) -> ArchetypeQueryIter<T> {
+        ArchetypeQueryIter::new(self)
+    }
+
+    pub fn indices(&self) -> &Vec<&'a Vec<EntityId>> {
+        &self.indices
+    }
+
+    pub fn storage(&self) -> &Vec<&'a Vec<T>> {
+        &self.storages
+    }
+
+    pub fn query(&self, entity_id: EntityId) -> Option<&T> {
+        self.entity_to_index[entity_id]
+    }
+}
+
+pub struct ArchetypeQueryMut<'a, T: Component + 'static> {
+    indices: Vec<&'a Vec<EntityId>>,
+    storages: Vec<&'a mut Vec<T>>,
+}
+
+impl<'a, T: Component + 'static> ArchetypeQueryMut<'a, T> {
+    pub fn new(indices: Vec<&'a Vec<EntityId>>, storages: Vec<&'a mut Vec<T>>) -> Self {
+        Self { indices, storages }
+    }
+
+    pub fn iter_mut(&mut self) -> ArchetypeQueryIterMut<'a, T> {
+        ArchetypeQueryIterMut::new(self)
+    }
+
+    pub fn indices(&self) -> &Vec<&'a Vec<EntityId>> {
+        &self.indices
+    }
+
+    pub fn storages(&mut self) -> &mut Vec<&'a mut Vec<T>> {
+        &mut self.storages
+    }
+}

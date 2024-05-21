@@ -48,11 +48,11 @@ pub fn cow_task(_attr: TokenStream, item: TokenStream) -> TokenStream {
                             if actual_path == "Comps" {
                                 templates.push(generic_type);
                                 tasks_type.push(quote!(cow_ecs::schedule::task_type::TaskType::Comp(std::any::TypeId::of::<#generic_type>())));
-                                args_call.push(quote!(Comps::new(&&comps.query::<#generic_type>().unwrap().storage().read().unwrap())));
+                                args_call.push(quote!(Comps::new(archs.fetch_info::<#generic_type>())));
                             } else if actual_path == "CompsMut" {
                                 templates.push(generic_type);
                                 tasks_type.push(quote!(cow_ecs::schedule::task_type::TaskType::CompMut(std::any::TypeId::of::<#generic_type>())));
-                                args_call.push(quote!(CompsMut::new(& mut comps.query::<#generic_type>().unwrap().storage().write().unwrap())));
+                                args_call.push(quote!(CompsMut::new(archs.fetch_info_mut::<#generic_type>())));
                             } else if actual_path == "Res" {
                                 tasks_type.push(quote!(cow_ecs::schedule::task_type::TaskType::Res(std::any::TypeId::of::<#generic_type>())));
                                 args_call.push(quote!(Res::new(&res.query::<#generic_type>().unwrap().resource().read().unwrap())));
@@ -105,15 +105,11 @@ pub fn cow_task(_attr: TokenStream, item: TokenStream) -> TokenStream {
                 #fn_name_str.to_string()
             }
 
-            fn register(&self, world: &mut cow_ecs::world::World){
-                #(world.components_mut().register::<#templates>();)*
-            }
-
             fn arguments(&self) -> Vec<cow_ecs::schedule::task_type::TaskType> {
                 vec![#(#tasks_type),*]
             }
 
-            fn run(&self, comps: &cow_ecs::component::comp_manager::CompManager,
+            fn run(&self, archs: &mut cow_ecs::archetype::archetype_manager::ArchetypeManager,
                 commands : &mut cow_ecs::commands::EntityCommands,
                 res : &cow_ecs::resource::res_manager::ResManager) {
                 #input_fn
