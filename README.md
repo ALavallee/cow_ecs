@@ -41,8 +41,6 @@ fn main() {
 
 ## TODO
 
-- Archetype implementation (currently working on it)
-
 - Remove all uses of unwrap
 
 - Parallel Scheduler
