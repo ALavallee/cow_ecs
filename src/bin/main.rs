@@ -1,4 +1,4 @@
-use std::time::{Duration, Instant};
+use std::time::{Instant};
 use cow_macros::{cow_task, Resource};
 use cow_ecs::comps::{Comps, CompsMut, Res, ResMut};
 use cow_ecs::cow_macros::Component;

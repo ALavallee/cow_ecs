@@ -1,7 +1,6 @@
-use crate::archetype::archetype_iter::{ArchetypeQueryIter, ArchetypeQueryIterMut, ArchetypeQueryIterMutNoIndex};
+use crate::archetype::archetype_iter::{ArchetypeQueryIter, ArchetypeQueryIterMut};
 use crate::archetype::archetype_query::{ArchetypeQuery, ArchetypeQueryMut};
 use crate::commands::{EntityCommand, EntityCommands};
-use crate::component::comp_storage::CompStorage;
 use crate::component::component::Component;
 use crate::entity::entity::EntityId;
 use crate::resource::resource::Resource;
@@ -19,8 +18,8 @@ impl<'a, T: Component + 'static> Comps<'a, T> {
         ArchetypeQueryIter::new(&self.query)
     }
 
-    pub fn query(&self, id: EntityId) -> Option<&T> {
-        self.query.query(id)
+    pub fn query(&self, entity_id: EntityId) -> Option<&T> {
+        self.query.query(entity_id)
     }
 }
 
@@ -38,13 +37,13 @@ impl<'a, T: Component + 'static> CompsMut<'a, T> {
         ArchetypeQueryIterMut::new(&mut self.query)
     }
 
-    /*pub fn query_mut(&mut self, id: EntityId) -> Option<&mut T> {
-        self.storage.query_mut(id)
-    }*/
+    pub fn query_mut(&mut self, id: EntityId) -> Option<&mut T> {
+        self.query.query_mut(id)
+    }
 
-    /*pub fn query(&self, id: EntityId) -> Option<&T> {
-        self.storage.query(id)
-    }*/
+    pub fn query(&self, id: EntityId) -> Option<&T> {
+        self.query.query(id)
+    }
 }
 
 pub struct Res<'a, T: Resource> {

@@ -1,4 +1,4 @@
-use std::any::{Any, TypeId};
+use std::any::{TypeId};
 use std::collections::HashMap;
 use crate::component::comp_storage::{CompStorage, CompStorageAny};
 use crate::component::component::Component;

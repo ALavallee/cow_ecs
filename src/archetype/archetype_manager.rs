@@ -160,7 +160,7 @@ impl ArchetypeManager {
             }
         }
 
-        ArchetypeQuery::new(,indices, storages)
+        ArchetypeQuery::new(indices, storages)
     }
 
     pub fn fetch_info_mut<T: Component>(&mut self) -> ArchetypeQueryMut<T> {

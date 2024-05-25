@@ -1,19 +1,16 @@
-use std::collections::HashMap;
 use crate::archetype::archetype_iter::{ArchetypeQueryIter, ArchetypeQueryIterMut};
 use crate::component::component::Component;
 use crate::entity::entity::EntityId;
 
 pub struct ArchetypeQuery<'a, T: Component + 'static> {
-    entity_to_index: &'a HashMap<EntityId, usize>,
     indices: Vec<&'a Vec<EntityId>>,
     storages: Vec<&'a Vec<T>>,
 }
 
 impl<'a, T: Component + 'static> ArchetypeQuery<'a, T> {
-    pub fn new(entity_to_index: &'a HashMap<EntityId, usize>,
-               indices: Vec<&'a Vec<EntityId>>,
+    pub fn new(indices: Vec<&'a Vec<EntityId>>,
                storages: Vec<&'a Vec<T>>) -> Self {
-        Self { entity_to_index, indices, storages }
+        Self { indices, storages }
     }
 
     pub fn iter(&self) -> ArchetypeQueryIter<T> {
@@ -28,8 +25,16 @@ impl<'a, T: Component + 'static> ArchetypeQuery<'a, T> {
         &self.storages
     }
 
-    pub fn query(&self, entity_id: EntityId) -> Option<&T> {
-        self.entity_to_index[entity_id]
+    pub fn query(&self, entity_query: EntityId) -> Option<&T> {
+        for (i, indices) in self.indices.iter().enumerate() {
+            for (j, entity) in indices.iter().enumerate() {
+                if *entity == entity_query {
+                    return Some(&self.storages[i][j]);
+                }
+            }
+        }
+
+        None
     }
 }
 
@@ -53,5 +58,29 @@ impl<'a, T: Component + 'static> ArchetypeQueryMut<'a, T> {
 
     pub fn storages(&mut self) -> &mut Vec<&'a mut Vec<T>> {
         &mut self.storages
+    }
+
+    pub fn query(&self, entity_query: EntityId) -> Option<&T> {
+        for (i, indices) in self.indices.iter().enumerate() {
+            for (j, entity) in indices.iter().enumerate() {
+                if *entity == entity_query {
+                    return Some(&self.storages[i][j]);
+                }
+            }
+        }
+
+        None
+    }
+
+    pub fn query_mut(&mut self, entity_query: EntityId) -> Option<&mut T> {
+        for (i, indices) in self.indices.iter().enumerate() {
+            for (j, entity) in indices.iter().enumerate() {
+                if *entity == entity_query {
+                    return Some(&mut self.storages[i][j]);
+                }
+            }
+        }
+
+        None
     }
 }

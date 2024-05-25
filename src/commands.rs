@@ -26,16 +26,12 @@ impl EntityCommands {
     pub fn release(&mut self, entity_id: EntityId) {
         self.commands.push(EntityCommand::ReleaseEntity(entity_id))
     }
-
-    pub(crate) fn take_commands(self) -> Vec<EntityCommand> {
-        self.commands
-    }
 }
 
 impl EntityCommand {
     pub fn add<T: Component + 'static>(&mut self, comp: T) {
         match self {
-            EntityCommand::NewEntity(id, ref mut components) => {
+            EntityCommand::NewEntity(_id, ref mut components) => {
                 let type_id = TypeId::of::<T>();
                 components.insert(type_id, Box::new(comp));
             }

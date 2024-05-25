@@ -1,6 +1,5 @@
 use std::any::{Any, TypeId};
-use crate::component::component::{Component, ComponentAny};
-use crate::entity::entity::EntityId;
+use crate::component::component::{Component};
 
 pub trait CompStorageAny {
     fn as_any(&self) -> &dyn Any;
